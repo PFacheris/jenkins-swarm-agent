@@ -77,7 +77,7 @@ if [ "$action" = "release" ]; then
         # build args but then Docker hub can't reference the exact Dockerfile
         # that produced the image without storing that state so I'll cut them some
         # slack.
-        git tag -f -a $swarm_version
+        git tag -f -a -m "Release ${swarm_version}" $swarm_version
         git push origin HEAD
     else
         echo "Current branch is not master, rejecting release."
