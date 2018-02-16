@@ -8,6 +8,8 @@ xenial=(7 8)
 ubuntu_versions['trusty']=${trusty[@]}
 ubuntu_versions['xenial']=${xenial[@]}
 
+action=${1:-}
+
 # Get latest swarm version
 swarm_version=$(curl -k https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/swarm-client/maven-metadata.xml | sed  -n 's/.*<latest>\(.*\)<\/latest>/\1/p')
 if [ -z "$swarm_version" ]; then
@@ -66,16 +68,19 @@ done
 
 # Create tag for swarm version if it does not exist
 set +e
-git rev-parse -q --verify "refs/tags/${swarm_version}"
-if [[ $? -ne 0 ]]; then
-    echo 'New swarm version detected.'
-    git diff-index --quiet HEAD --
-    # Only tag on non-dirty state
-    if [[ $? -eq 0 ]]; then
-        git tag -a $swarm_version
+if [ "$action" = "release" ]; then
+    echo 'Performing release...'
+    branch=$(git rev-parse --abbrev-ref HEAD)
+    if [ "$branch" = "master" ]; then
+        git commit -am "Run update.sh"
+        # Moving tags are something I'm not a fan of and I'd rather rely on
+        # build args but then Docker hub can't reference the exact Dockerfile
+        # that produced the image without storing that state so I'll cut them some
+        # slack.
+        git tag -f -a $swarm_version
+        git push origin HEAD
     else
-        echo 'Repository is in a dirty state, no tag will be created.'
+        echo "Current branch is not master, rejecting release."
+        exit 1
     fi
-else
-    echo "Tag already exists for ${swarm_version}, manual intervention required."
 fi
