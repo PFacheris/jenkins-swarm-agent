@@ -72,14 +72,15 @@ if [ "$action" = "release" ]; then
     echo 'Performing release...'
     branch=$(git rev-parse --abbrev-ref HEAD)
     if [ "$branch" = "master" ]; then
-        git commit -am "Run update.sh"
+        git add --all
+        git commit -m "Run update.sh"
         git push origin HEAD
         # Moving tags are something I'm not a fan of and I'd rather rely on
         # build args but then Docker hub can't reference the exact Dockerfile
         # that produced the image without storing that state so I'll cut them some
         # slack.
         git tag -f -a -m "Release ${swarm_version}" $swarm_version
-        git push --tags
+        git push -f --tags
     else
         echo "Current branch is not master, rejecting release."
         exit 1
