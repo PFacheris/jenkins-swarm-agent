@@ -18,6 +18,7 @@ if [ -z "$swarm_version" ]; then
 fi
 
 # Ubuntu Dockerfiles
+rm -rf ubuntu
 for ubuntu_version in ${!ubuntu_versions[@]}; do
     for java_version in ${ubuntu_versions[$ubuntu_version]}; do
         version=ubuntu/${ubuntu_version}/jre-${java_version}
